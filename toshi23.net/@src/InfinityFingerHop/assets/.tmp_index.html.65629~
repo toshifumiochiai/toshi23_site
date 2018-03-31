@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>15 PUZZLE</title>
+<style type="text/css">
+	body {
+		margin: 0px 0px 0px 0px;
+		padding: 0px 0px 0px 0px;
+		background: #FFFFFF;
+	}
+	#btn {
+		border-radius: 8px;
+		-webkit-border-radius: 8px;
+		background-color: #5ed1d7;
+		background: -webkit-gradient(linear, left top, left bottom, from(#757575), to(#D8D8D8));
+		font-size: 120%;
+		width: 320px;
+		text-align: center;
+		margin: 0 auto;
+	}
+	#btn a {
+		text-shadow: -1px -1px 0 rgba(150, 150, 150, 0.3);
+		display: block;
+		padding: 5px 0;
+
+		color: #ffffff;
+		text-decoration: none;
+	}
+</style>
+</head>
+<body>
+<script type="text/javascript">
+var canvas  = null;
+var context = null;
+
+//ゲーム状態
+var GAME_STATUS_START   = 0;
+var GAME_STATUS_SHUFFLE = 1;
+var GAME_STATUS_PLAY    = 2;
+var GAME_STATUS_FINISH  = 3;
+
+var gameStatus = GAME_STATUS_START;
+
+//ピースに関する変数
+var PIECE_WIDTH  = 80;
+var PIECE_HEIGHT = 80;
+
+var pieceInfo = null;
+var pieceImage = null;
+
+var pieceGameList = null;
+
+window.addEventListener( "load", onWindowLoaded, false );
+function onWindowLoaded() {
+	//Canvas生成
+/*
+	canvas = document.createElement( "canvas" );
+	canvas.width  = 320;
+	canvas.height = 320;
+
+	document.body.appendChild( canvas );
+*/
+
+	canvas = document.getElementById( "canvas" );
+
+	//Context生成
+	context = canvas.getContext( "2d" );
+
+	gameInit();
+}
+
+//ゲーム関連パラメータの初期化
+function gameInit() {
+	//ピース情報生成
+	pieceInfo = new Array();
+	pieceInfo[ 0 ] = { x : 0, y : 0 };
+	pieceInfo[ 1 ] = { x : 80, y : 0 };
+	pieceInfo[ 2 ] = { x : 160, y : 0 };
+	pieceInfo[ 3 ] = { x : 240, y : 0 };
+
+	pieceInfo[ 4 ] = { x : 0, y : 80 };
+	pieceInfo[ 5 ] = { x : 80, y : 80 };
+	pieceInfo[ 6 ] = { x : 160, y : 80 };
+	pieceInfo[ 7 ] = { x : 240, y : 80 };
+
+	pieceInfo[ 8 ] = { x : 0, y : 160 };
+	pieceInfo[ 9 ] = { x : 80, y : 160 };
+	pieceInfo[ 10 ] = { x : 160, y : 160 };
+	pieceInfo[ 11 ] = { x : 240, y : 160 };
+
+	pieceInfo[ 12 ] = { x : 0, y : 240 };
+	pieceInfo[ 13 ] = { x : 80, y : 240 };
+	pieceInfo[ 14 ] = { x : 160, y : 240 };
+	pieceInfo[ 15 ] = { x : 240, y : 240 };
+
+	//ピース画像読み込み
+	pieceImage = new Image();
+	pieceImage.addEventListener( "load", onPieceImageLoaded, false );
+	function onPieceImageLoaded() {
+		drawScreen();
+	}
+	pieceImage.src = "images/piece.png";
+
+	canvas.addEventListener( "click", onMouseDown, false );
+	//canvas.addEventListener( "touchstart", onMouseDown, false );
+}
+
+function naviGameButton() {
+	document.getElementById( "btn_str" ).innerHTML = "RETRY";
+
+	if( gameStatus == GAME_STATUS_START ) {
+		gameStatus = GAME_STATUS_SHUFFLE;
+		pieceShuffle();
+	}
+}
+
+//
+function onMouseDown( event ) {
+	switch( gameStatus ) {
+		case GAME_STATUS_PLAY :
+			var mouseX = event.clientX;
+			var mouseY = event.clientY;
+
+			var pieceIndex = null;
+
+			for( var i = 0; i < pieceInfo.length; i++ ) {
+				var posX = pieceInfo[ i ].x;
+				var posY = pieceInfo[ i ].y;
+
+				if( ( posX <= mouseX && mouseX <= posX + PIECE_WIDTH ) && ( posY <= mouseY && mouseY <= posY + PIECE_HEIGHT ) ) {
+					pieceIndex = i;
+					break;
+				}
+			}
+			swapPiece( pieceIndex, posX, posY );
+			break;
+		default : break;
+	}
+}
+
+//ピースを入れ替え
+function swapPiece( pieceIndex, srcX, srcY ) {
+	var dstX = 0;
+	var dstY = 0;
+	var spaceIndex = 0;
+
+	var pieceNum = pieceGameList[ pieceIndex ];
+
+	if( pieceNum == 15 ) {
+		//押下した場所がスペース
+		return;
+	}
+	else {
+
+		//スペースの位置を調べる
+		for( var i = 0; i < pieceGameList.length; i++ ) {
+			if( pieceGameList[ i ] == 15 ) {
+				spaceIndex = i;
+				dstX = pieceInfo[ i ].x;
+				dstY = pieceInfo[ i ].y;
+				break;
+			}
+		}
+		diffX = Math.abs( srcX - dstX );
+		diffY = Math.abs( srcY - dstY );
+		if( diffX + diffY == PIECE_WIDTH ) {
+			//ピースとスペースの位置を交換
+			pieceGameList[ pieceIndex ] = 15;
+			pieceGameList[ spaceIndex ] = pieceNum;
+
+			drawScreen();
+		}
+	}
+}
+
+//ピースをシャッフル
+function pieceShuffle() {
+	var pieceList  = new Array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 );
+	pieceGameList = new Array();
+
+	for( var i = pieceList.length; i >= 1; i-- ) {
+		var randomNum = Math.floor( Math.random() * i );
+		var choiceNum = pieceList[ randomNum ];
+
+		pieceGameList.push( choiceNum );
+		pieceList.splice( randomNum, 1 );
+	}
+	pieceGameList.push( 15 );
+
+	//クリア可能かチェック
+	var count = 0;
+	for( var i = 0; i <= pieceGameList.length - 2; i++ ) {
+		var checkNum1 = pieceGameList[ i ];
+		for( var j = i + 1; j <= pieceGameList.length - 1; j++ ) {
+			var checkNum2 = pieceGameList[ j ];
+			if( checkNum1 > checkNum2 ) {
+				count++;
+			}
+		}
+	}
+	if( count % 2 == 0 ) {
+		//ピース情報にピース番号代入
+		drawScreen();
+	}
+	else {
+		//クリア不可なので再度シャッフル
+		pieceShuffle();
+	}
+}
+
+//ゲームが終了しているか確認
+function gameFinishCheck() {
+console.log( pieceGameList );
+
+	var checkCount = 0;
+	for( var i = 0; i < pieceGameList.length; i++ ) {
+		if( i != pieceGameList[ i ] ) {
+			break;
+		}
+		checkCount++;
+	}
+	if( checkCount == pieceGameList.length ) {
+		gameStatus = GAME_STATUS_FINISH;
+	}
+}
+
+//画面描画処理
+function drawScreen() {
+	switch( gameStatus ) {
+		case GAME_STATUS_START :
+			context.drawImage( pieceImage, 0, 0 );
+
+//			gameStatus = GAME_STATUS_SHUFFLE;
+//			pieceShuffle();
+
+			break;
+		case GAME_STATUS_SHUFFLE :
+			for( var i = 0; i < pieceInfo.length; i++ ) {
+				var srcIndex = pieceGameList[ i ];
+
+				var srcX = pieceInfo[ srcIndex ].x;
+				var srcY = pieceInfo[ srcIndex ].y;
+
+				var dstX = pieceInfo[ i ].x;
+				var dstY = pieceInfo[ i ].y;
+
+				context.drawImage( pieceImage, srcX, srcY, PIECE_WIDTH, PIECE_HEIGHT, dstX, dstY, PIECE_WIDTH, PIECE_HEIGHT );
+			}
+			gameStatus = GAME_STATUS_PLAY;
+			break;
+		case GAME_STATUS_PLAY :
+			for( var i = 0; i < pieceInfo.length; i++ ) {
+				var srcIndex = pieceGameList[ i ];
+
+				var srcX = pieceInfo[ srcIndex ].x;
+				var srcY = pieceInfo[ srcIndex ].y;
+
+				var dstX = pieceInfo[ i ].x;
+				var dstY = pieceInfo[ i ].y;
+
+				context.clearRect( dstX, dstY, PIECE_WIDTH, PIECE_HEIGHT );
+				context.drawImage( pieceImage, srcX, srcY, PIECE_WIDTH, PIECE_HEIGHT, dstX, dstY, PIECE_WIDTH, PIECE_HEIGHT );
+			}
+			gameFinishCheck();
+			break;
+		default : break;
+	}
+}
+</script>
+<canvas id="canvas" width="320" height="320"></canvas>
+<p id="btn">
+<a id="btn_str" href="javascript:void(0)" onClick="naviGameButton(); return false;">START</a>
+</p>
+<br>
+<p id="btn">
+<a id="btn_str" href="javascript:void(0)" onClick="gameExit(); return false;">EXIT</a>
+</p>
+</body>
+</html>

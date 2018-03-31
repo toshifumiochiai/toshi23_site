@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CreateJS export from createjsTest06</title>
+
+<script src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
+<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
+<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
+<script src="createjsTest06.js"></script>
+
+<script>
+var canvas, stage, exportRoot;
+
+function init() {
+	canvas = document.getElementById("canvas");
+	exportRoot = new lib.createjsTest06();
+
+	exportRoot.removeChild(exportRoot.jlMC);
+
+	stage = new createjs.Stage(canvas);
+	stage.addChild(exportRoot);
+	stage.update();
+
+	createjs.Ticker.setFPS(24);
+	createjs.Ticker.addListener(stage);
+
+	exportRoot.StageMC.onClick = JackLanternPutStage;
+}
+
+function JackLanternPutStage(eventObj) {
+	var jack = new lib.mcJackoLantern();
+
+	jack.x = eventObj.stageX;
+	jack.y = eventObj.stageY;
+
+	jack.onClick	= JackLanternOnAnime;
+	jack.onAnimEnd	= JackLanternOnAnimeEnd;
+
+	exportRoot.addChild(jack);
+
+	stage.update();
+}
+
+function JackLanternOnAnime(eventObj) {
+	eventObj.target.gotoAndPlay("anim");
+}
+
+function JackLanternOnAnimeEnd(jack) {
+	exportRoot.removeChild(jack);
+}
+</script>
+</head>
+
+<body onload="init();" style="background-color:#D4D4D4">
+	<canvas id="canvas" width="640" height="400" style="background-color:#000000"></canvas>
+</body>
+</html>

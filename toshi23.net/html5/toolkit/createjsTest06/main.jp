@@ -1,0 +1,44 @@
+var canvas, stage, exportRoot;
+
+function init() {
+	canvas = document.getElementById("canvas");
+	exportRoot = new lib.createjsTest06();
+
+	exportRoot.removeChild(exportRoot.jlMC);
+
+	stage = new createjs.Stage(canvas);
+	stage.addChild(exportRoot);
+	stage.update();
+
+	createjs.Ticker.setFPS(24);
+	createjs.Ticker.addListener(stage);
+
+/*
+	exportRoot.jlMC.onClick = JackLanternOnAnime;
+	exportRoot.jlMC.onAnimEnd = JackLanternOnAnimeEnd;
+*/
+
+	exportRoot.StageMC.onClick = JackLanternPutStage;
+}
+
+function JackLanternPutStage(eventObj) {
+	var jack = new lib.mcJackoLantern();
+
+	jack.x = eventObj.stageX;
+	jack.y = eventObj.stageY;
+
+	exportRoot.addChild(jack);
+
+	stage.update();
+}
+
+
+
+
+function JackLanternOnAnime(eventObj) {
+	eventObj.target.gotoAndPlay("anim");
+}
+
+function JackLanternOnAnimeEnd(eventObj) {
+	console.log("-----");
+}

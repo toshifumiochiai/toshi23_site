@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CreateJS export from omikuji</title>
+
+<script src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
+<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
+<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
+<script src="http://code.createjs.com/preloadjs-0.2.0.min.js"></script>
+<script src="omikuji.js"></script>
+
+<script>
+var canvas, stage, exportRoot;
+
+var resultNum;
+
+function init() {
+	canvas = document.getElementById("canvas");
+	images = images||{};
+
+	var manifest = [
+		{src:"images/lotbox.png", id:"lotbox"},
+		{src:"images/stick.png", id:"stick"}
+	];
+
+	var loader = new createjs.PreloadJS(false);
+	loader.onFileLoad = handleFileLoad;
+	loader.onComplete = handleComplete;
+	loader.loadManifest(manifest);
+}
+
+function handleFileLoad(o) {
+	if (o.type == "image") { images[o.id] = o.result; }
+}
+
+function handleComplete() {
+	exportRoot = new lib.omikuji();
+
+	stage = new createjs.Stage(canvas);
+	stage.addChild(exportRoot);
+	stage.update();
+
+	createjs.Ticker.setFPS(12);
+	createjs.Ticker.addListener(stage);
+
+	exportRoot.LotBoxAreaMC.onClick = LotBoxOnClick;
+
+	exportRoot.LotBoxMC.onStickOut = LotBoxOnStickOut;
+
+	exportRoot.onCoverEnd = rootOnCoverEnd;
+}
+
+function LotBoxOnClick(eventObj) {
+	exportRoot.gotoAndPlay("move");
+	exportRoot.LotBoxMC.gotoAndPlay("shake");
+}
+
+
+function LotBoxOnStickOut(eventObj) {
+	resultNum = Math.floor(Math.random() * 5);
+
+	exportRoot.gotoAndPlay("cover");
+}
+
+function rootOnCoverEnd(eventObj) {
+	switch(resultNum) {
+		case 0 : exportRoot.gotoAndPlay("result1"); break;
+		case 1 : exportRoot.gotoAndPlay("result2"); break;
+		case 2 : exportRoot.gotoAndPlay("result3"); break;
+		case 3 : exportRoot.gotoAndPlay("result4"); break;
+		case 4 : exportRoot.gotoAndPlay("result5"); break;
+	}
+}
+
+</script>
+</head>
+
+<body onload="init();" style="background-color:#D4D4D4">
+	<canvas id="canvas" width="320" height="480" style="background-color:#333333"></canvas>
+</body>
+</html>

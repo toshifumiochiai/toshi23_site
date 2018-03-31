@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>CreateJS export from createjsTest08</title>
+
+<script src="getQueryString.js"></script>
+
+<script src="http://code.createjs.com/easeljs-0.5.0.min.js"></script>
+<script src="http://code.createjs.com/tweenjs-0.3.0.min.js"></script>
+<script src="http://code.createjs.com/movieclip-0.5.0.min.js"></script>
+<script src="createjsTest08.js"></script>
+
+<script>
+var canvas, stage, exportRoot;
+var skipFlg;
+var strURL;
+
+function init(to_url) {
+	canvas = document.getElementById("canvas");
+	exportRoot = new lib.createjsTest08();
+
+	stage = new createjs.Stage(canvas);
+	stage.addChild(exportRoot);
+	stage.update();
+
+	createjs.Ticker.setFPS(24);
+	createjs.Ticker.addListener(stage);
+
+	skipFlg = 1;
+
+	strURL = to_url;
+
+	console.log(strURL);
+
+	exportRoot.ButtonMC.onClick	= buttonOnClick;
+	exportRoot.onAnimeEnd		= movieOnAnimeEnd;
+}
+
+function buttonOnClick(eventObj) {
+	if(skipFlg == 1) {
+		skipFlg = 0;
+		exportRoot.gotoAndPlay("title");
+	}
+	else {
+		//var	strURL = getQueryString("u");
+		//console.log(strURL);
+		document.location = strURL;
+	}
+}
+
+function movieOnAnimeEnd(obj) {
+	skipFlg = 0;
+}
+
+</script>
+</head>
+
+<body onload="init('move.html');" style="background-color:#D4D4D4">
+	<canvas id="canvas" width="640" height="400" style="background-color:#000000"></canvas>
+</body>
+</html>
